@@ -1,0 +1,245 @@
+<?php $__env->startSection('content'); ?>
+<div class="header bg-primary pb-6">
+  <div class="px-4">
+    <div class="header-body">
+      <div class="row align-items-center py-4">
+        <div class="col-lg-6 col-7">
+          <h6 class="h2 text-white d-inline-block mb-0">Permohonan Service</h6>
+        </div>
+        <div class="col-lg-6 col-5 text-right">
+          <?php if (! (auth()->user()->hasRole('mutu'))): ?>
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#tambah">
+              Tambah data
+            </button>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid mt--6">
+  <div class="card shadow-sm">
+    <?php echo $__env->make('components.alert', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
+    
+    <form method="GET" class="p-4 pt-2 pb-3">
+      <h5 class="mb-3">Filter Permohonan</h5>
+      <div class="row align-items-end">
+        <div class="col-md-3 mb-2">
+          <label>Cari Tiket / Nama</label>
+          <input type="text" name="search" class="form-control" value="<?php echo e(request('search')); ?>">
+        </div>
+
+        <div class="col-md-2 mb-2">
+          <label>Belum Disetujui</label>
+          <select name="belum_approve" class="form-control">
+            <option value="">Semua</option>
+            <option value="1" <?php echo e(request('belum_approve') == '1' ? 'selected' : ''); ?>>Belum Disetujui</option>
+          </select>
+        </div>
+
+        <div class="col-md-2 mb-2">
+          <label>Dari Tanggal</label>
+          <input type="date" name="from" class="form-control" value="<?php echo e(request('from')); ?>">
+        </div>
+
+        <div class="col-md-2 mb-2">
+          <label>Sampai Tanggal</label>
+          <input type="date" name="to" class="form-control" value="<?php echo e(request('to')); ?>">
+        </div>
+
+        <div class="col-md-1 mb-2">
+          <label>Tampil</label>
+          <select name="limit" class="form-control">
+            <?php $__currentLoopData = [5, 10, 25, 50, 100]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $limit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option value="<?php echo e($limit); ?>" <?php echo e(request('limit', 10) == $limit ? 'selected' : ''); ?>><?php echo e($limit); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+          </select>
+        </div>
+
+        <div class="col-md-2 mb-2">
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top: 8px;">
+            <i class="fas fa-filter mr-1"></i> Terapkan
+          </button>
+        </div>
+      </div>
+    </form>
+
+    
+    <div class="table-responsive p-4">
+      <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th>No</th>
+            <th>No. Tiket</th>
+            <th>Nama Pemohon</th>
+            <th>Department</th>
+            <th>Unit</th>
+            <th>Tgl. Permohonan</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+    <tbody>
+  <?php $__empty_1 = true; $__currentLoopData = $services; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+    <?php
+      $user = $service->user;
+      $unitPemohon = optional($user)->unit;
+      $dept = optional($user)->department;
+
+      $auth = auth()->user();
+      $jabatan_id = $auth->jabatan_id;
+
+      $isKepalaUnit = $jabatan_id == 2;
+      $isSPV = $jabatan_id == 3;
+      $isManager = $jabatan_id == 4;
+
+      $isUnitYangDipimpin = \App\Models\Unit::where('kepala_unit_id', $auth->id)
+                                ->where('id', $user->unit_id)
+                                ->exists();
+
+      $canApproveSPV = $isSPV && $user->department_id == $auth->department_id;
+      $canApproveManager = $isManager && $user->department_id == $auth->department_id;
+
+      $canReject = ($canApproveSPV && $service->status_id == 3) || ($canApproveManager && $service->status_id < 6);
+      $isUrgent = $service->type_permohonan == 1;
+    ?>
+    <tr <?php if($isUrgent && $service->status_id <= 7): ?> class="text-danger" <?php endif; ?>>
+      <td><?php echo e(($services->currentPage() - 1) * $services->perPage() + $loop->iteration); ?></td>
+      <td><?php echo e($service->no_tiket); ?></td>
+      <td><?php echo e($user->nama ?? '-'); ?></td>
+      <td><?php echo e($dept->nama ?? '-'); ?></td>
+      <td><?php echo e($unitPemohon->nama_unit ?? '-'); ?></td>
+      <td><?php echo e(optional($service->created_at)->format('d M Y H:i')); ?> WIB</td>
+      <td>
+        <span class="badge
+          <?php if(in_array($service->status_id,[3,4])): ?> badge-info
+          <?php elseif($service->status_id==5): ?> badge-warning
+          <?php elseif($service->status_id==6): ?> badge-primary
+          <?php elseif($service->status_id==7): ?> badge-success
+          <?php elseif($service->status_id==8): ?> badge-secondary
+          <?php else: ?> badge-danger <?php endif; ?>">
+          <?php echo e($service->status_name); ?>
+
+        </span>
+        <?php if($isUrgent): ?>
+          <span class="badge badge-danger ml-1">URGENT</span>
+        <?php endif; ?>
+      </td>
+      <td>
+        <a href="<?php echo e(route('service.show', $service->id)); ?>" class="btn btn-sm btn-info" title="Detail">
+          <i class="fa fa-eye"></i>
+        </a>
+
+        <?php if($canApproveSPV && $service->status_id == 3): ?>
+          <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalApprove<?php echo e($service->id); ?>" title="Approve SPV">
+            <i class="fa fa-check"></i>
+          </button>
+        <?php endif; ?>
+
+        <?php if($canApproveManager && $service->status_id < 6): ?>
+          <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalApprove<?php echo e($service->id); ?>" title="Approve Manager">
+            <i class="fa fa-check"></i>
+          </button>
+        <?php endif; ?>
+
+        <?php if($canReject): ?>
+          <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#modalTolak<?php echo e($service->id); ?>" title="Tolak">
+            <i class="fa fa-times"></i>
+          </button>
+        <?php endif; ?>
+
+        <?php echo $__env->make('service._modal_approve', ['service' => $service], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+        <?php echo $__env->make('service._modal_tolak', ['service' => $service], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+      </td>
+    </tr>
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+    <tr>
+      <td colspan="8" class="text-center">Tidak ada data ditemukan.</td>
+    </tr>
+  <?php endif; ?>
+</tbody>
+
+      </table>
+    </div>
+
+    
+    <div class="card-footer">
+      <?php echo e($services->appends(request()->query())->links('pagination::bootstrap-4')); ?>
+
+    </div>
+  </div>
+</div>
+
+
+<?php if (! (auth()->user()->hasRole('mutu'))): ?>
+  <?php echo $__env->make('service._modal_tambah', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php endif; ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('styles'); ?>
+<style>
+  .form-control, .btn, select {
+    border-radius: 6px;
+  }
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .table th, .table td {
+    vertical-align: middle !important;
+    font-size: 0.88rem;
+  }
+
+  .btn-filter {
+    background-color: #5e72e4;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: 0.3s ease;
+  }
+
+  .btn-filter:hover {
+    background-color: #324cdd;
+  }
+
+  .card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+</style>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+  $(document).ready(function () {
+    $(document).on('change', '#jenis_inventaris_id', function () {
+      var jenisId = $(this).val();
+      var inventarisSelect = $('#inventaris_id');
+      inventarisSelect.html('<option value="">Memuat...</option>');
+
+      if (jenisId) {
+        $.ajax({
+          url: '/get-inventaris/' + jenisId,
+          type: 'GET',
+          success: function (data) {
+            inventarisSelect.empty().append('<option value="">-- Pilih Inventaris --</option>');
+            $.each(data, function (key, value) {
+              inventarisSelect.append('<option value="' + value.id + '">' + value.nama + '</option>');
+            });
+          },
+          error: function () {
+            inventarisSelect.html('<option value="">Gagal memuat</option>');
+          }
+        });
+      } else {
+        inventarisSelect.html('<option value="">-- Pilih Inventaris --</option>');
+      }
+    });
+  });
+</script>
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\project_form\resources\views/service/index.blade.php ENDPATH**/ ?>

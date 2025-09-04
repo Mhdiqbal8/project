@@ -1,0 +1,155 @@
+/*
+  primary-color = #15B771
+  disabled-color = #e8f7e4
+  highlight-color = #15b77128
+*/
+
+
+/* Costumization color/body Application */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap');
+
+
+html
+{
+    line-height: 1.15;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.075);
+}
+
+body
+{
+    font-family: 'Poppins' ,Chevin, Open Sans, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 0;
+    text-align: left;
+    color: #000;
+    background-color: #f8f9fe;
+}
+
+.g-sidenav-show .sidenav .nav-link-text
+{
+    transition: .3s ease;
+    opacity: 1;
+}
+.sidenav .nav-link-text
+{
+    color: #15B771;
+}
+.sidenav .nav-link-text:hover
+{
+    color: #179c63;
+}
+
+.button-right{
+  text-align: right !important;
+}
+
+.title-text{
+  font-family: Chevin, 'sans-serif', 'Roboto';
+  font-size: 2rem;
+  font-weight: 600;
+  color: #15B771;
+}
+
+.bg-primary
+{
+  background-color: #15B771 !important;
+}
+
+.text-primary
+{
+    color: #15B771 !important;
+}
+
+a.text-primary:hover,
+a.text-primary:focus
+{
+    color: #158856 !important;
+}
+
+a
+{
+    text-decoration: none;
+
+    color: #15B771;
+    background-color: transparent;
+}
+
+a:hover
+{
+    text-decoration: none;
+
+    color: #158856;
+}
+
+.navbar-vertical .navbar-brand-img,
+.navbar-vertical .navbar-brand > img
+{
+    max-width: 100%;
+    max-height: 3.5rem;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link
+{
+    color: #15b771;
+    border-color: #dee2e6 #dee2e6 #f8f9fe;
+    background-color: #f8f9fe;
+}
+
+.navbar-vertical.navbar-expand-xs .navbar-nav > .nav-item > .nav-link.active
+{
+    margin-right: .5rem;
+    margin-left: .5rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+
+    border-radius: .375rem;
+    background: #15b77128;
+}
+
+.page-item.active .page-link
+{
+    z-index: 3;
+
+    color: #fff;
+    border-color: #ffffff;
+    background-color: #15B771;
+}
+
+.main-content .navbar-top
+{
+    background-color: #15b77128 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+.navbar-top.border-bottom.navbar-dark
+{
+    border-color: #fff !important;
+    border-width: 1rem;
+}
+
+.form-control:disabled,
+.form-control[readonly]
+{
+    opacity: 1;
+    background-color: #e8f7e4;
+}
+
+
+.table.table-striped thead{
+    background-color: #D4EFE8;
+}
+
+
+
+
+@media (max-height: 767px){
+  .sidenav-toggler-inner {
+     margin-left : 30px;
+  }
+}
+
